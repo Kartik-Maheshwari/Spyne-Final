@@ -16,7 +16,7 @@ const Signup = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/auth/register",
+        "https://spyne-assignment-backend.onrender.com/api/auth/register",
         { name, email, password }
       );
       setAuth(response.data);

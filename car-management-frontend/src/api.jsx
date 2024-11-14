@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "http://localhost:5000/api", // Update with your backend URL
+  baseURL: "https://spyne-assignment-backend.onrender.com/api", // Update with your backend URL
 });
 
 export const registerUser = (data) => API.post("/auth/register", data);
