@@ -5,7 +5,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 
 const Signup = () => {
-  const { setAuth } = useAuthContext();
+  const { setAuth, baseURL } = useAuthContext();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -15,10 +15,11 @@ const Signup = () => {
     e.preventDefault();
 
     try {
-      const response = await axios.post(
-        "https://spyne-assignment-backend.onrender.com/api/auth/register",
-        { name, email, password }
-      );
+      const response = await axios.post(`${baseURL}/auth/register`, {
+        name,
+        email,
+        password,
+      });
       setAuth(response.data);
       localStorage.setItem("auth", JSON.stringify(response.data));
       toast.success("Registration successful! Redirecting to dashboard...");

@@ -1,20 +1,26 @@
 import React, { useEffect, useState } from "react";
-import { listCars } from "../../api";
 import { useAuthContext } from "../../context/AuthContext";
 import { Link } from "react-router-dom";
 import { SingleCar } from "./SingleCar";
+import axios from "axios";
 
 const CarList = () => {
-  const { auth } = useAuthContext();
+  const { auth, baseURL } = useAuthContext();
   const [cars, setCars] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredCars, setFilteredCars] = useState([]);
 
   useEffect(() => {
     const fetchCars = async () => {
-      const response = await listCars(auth.token);
-      setCars(response.data);
-      setFilteredCars(response.data); // Initialize filteredCars with all cars
+      try {
+        const response = await axios.get(`${baseURL}/cars`, {
+          headers: { Authorization: `Bearer ${auth.token}` },
+        });
+        setCars(response.data);
+        setFilteredCars(response.data); // Initialize filteredCars with all cars
+      } catch (error) {
+        console.error("Error fetching cars:", error);
+      }
     };
     fetchCars();
   }, [auth.token]);

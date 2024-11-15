@@ -1,27 +1,43 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { getCar, deleteCar } from "../../api";
 import { useAuthContext } from "../../context/AuthContext";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 const CarDetail = () => {
   const { id } = useParams();
-  const { auth } = useAuthContext();
+  const { auth, baseURL } = useAuthContext();
   const [car, setCar] = useState(null);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchCar = async () => {
-      const response = await getCar(id, auth.token);
-      console.log("Car detail", response.data);
+  const fetchCar = async () => {
+    try {
+      const response = await axios.get(`${baseURL}/cars/${id}`, {
+        headers: { Authorization: `Bearer ${auth.token}` },
+      });
       setCar(response.data);
-    };
-    fetchCar();
-  }, [id, auth.token]);
+    } catch (error) {
+      console.error("Error fetching car:", error);
+      toast.error("Failed to load car details. Please try again.");
+    }
+  };
 
   const handleDelete = async () => {
-    await deleteCar(id, auth.token);
-    navigate("/dashboard"); // Redirect after deletion
+    try {
+      await axios.delete(`${baseURL}/cars/${id}`, {
+        headers: { Authorization: `Bearer ${auth.token}` },
+      });
+      toast.success("Car deleted successfully!");
+      navigate("/dashboard");
+    } catch (error) {
+      console.error("Error deleting car:", error);
+      toast.error("Failed to delete car. Please try again.");
+    }
   };
+
+  useEffect(() => {
+    fetchCar();
+  }, [id]);
 
   const handleBack = () => {
     navigate(-1); // Go back to the previous page

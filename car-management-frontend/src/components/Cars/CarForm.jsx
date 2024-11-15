@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { createCar, updateCar, getCar } from "../../api";
 import { useAuthContext } from "../../context/AuthContext";
 import { useNavigate, useParams } from "react-router-dom";
+import axios from "axios";
 
 const CarForm = () => {
-  const { auth } = useAuthContext();
+  const { auth, baseURL } = useAuthContext();
   const navigate = useNavigate();
   const { id } = useParams(); // Get car ID from URL if editing
 
@@ -18,8 +18,12 @@ const CarForm = () => {
   useEffect(() => {
     if (id) {
       const fetchCar = async () => {
-        const response = await getCar(id, auth.token);
+        const response = await axios.get(`${baseURL}/cars/${id}`, {
+          headers: { Authorization: `Bearer ${auth.token}` },
+        });
         const car = response.data;
+        console.log("Car:", car.images);
+
         setTitle(car.title);
         setDescription(car.description);
         setTags(car.tags.join(", ")); // Convert tags to a comma-separated string
@@ -48,20 +52,57 @@ const CarForm = () => {
     formData.append("description", description);
     formData.append("tags", tags.split(","));
 
-    // Append new images
-    images.forEach((image) => {
-      formData.append("images", image);
-    });
+    // Append new images only if any are selected
+    if (images.length > 0) {
+      images.forEach((image) => {
+        formData.append("images", image);
+      });
+    }
 
+    // Append existing images as part of the form data (if any)
+    if (existingImages.length > 0) {
+      formData.append("existingImages", JSON.stringify(existingImages));
+    }
+
+    // Send request to backend
     if (id) {
-      // Update existing car if ID is present
-      await updateCar(id, formData, auth.token);
+      await updateCar(id, formData, auth.token); // Call updateCar API
     } else {
-      // Create new car
-      await createCar(formData, auth.token);
+      await createCar(formData, auth.token); // Call createCar API for new cars
     }
 
     navigate("/dashboard"); // Redirect after submission
+  };
+
+  const createCar = async (formData, token) => {
+    try {
+      const response = await axios.post(`${baseURL}/cars`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      console.log("Car created successfully:", response.data);
+      return response.data; // Return response data for further use
+    } catch (error) {
+      console.error("Error creating car:", error);
+      throw new Error("Failed to create car");
+    }
+  };
+
+  // Function to handle car update
+  const updateCar = async (id, formData, token) => {
+    try {
+      const response = await axios.put(`${baseURL}/cars/${id}`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      console.log("Car updated successfully:", response.data);
+      return response.data; // Return response data for further use
+    } catch (error) {
+      console.error("Error updating car:", error);
+      throw new Error("Failed to update car");
+    }
   };
 
   const handleBack = () => {

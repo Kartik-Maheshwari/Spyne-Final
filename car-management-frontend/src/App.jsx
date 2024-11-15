@@ -1,6 +1,6 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
-import { AuthProvider } from "./context/AuthContext"; // Ensure this import is correct
+import { AuthProvider } from "./context/AuthContext";
 import Navbar from "./components/Navbar";
 import Login from "./components/Auth/Login";
 import Signup from "./components/Auth/Signup";

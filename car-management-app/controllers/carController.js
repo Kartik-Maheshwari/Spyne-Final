@@ -49,27 +49,34 @@ export const getCar = async (req, res) => {
 
 export const updateCar = async (req, res) => {
   try {
-    const { title, description, tags } = req.body;
-    let images = req.files ? req.files.map((file) => file.path) : [];
+    const { title, description, tags, existingImages } = req.body;
 
-    if (images.length > 0) {
+    // Start with the existing images passed in the body, if available
+    let images = existingImages ? JSON.parse(existingImages) : [];
+    console.log("Images: ", images);
+
+    // If new images are uploaded via req.files, upload them to Cloudinary
+    if (req.files && req.files.length > 0) {
       const uploadedImages = await Promise.all(
-        images.map(async (image) => {
-          const result = await cloudinary.v2.uploader.upload(image);
+        req.files.map(async (file) => {
+          const result = await cloudinary.v2.uploader.upload(file.path);
           return result.secure_url; // Get the URL of the uploaded image
         })
       );
-      images = uploadedImages; // Set the uploaded images as the new images
+      images = [...images, ...uploadedImages]; // Combine existing images with newly uploaded ones
     }
 
+    // Update the car in the database
     const car = await Car.findByIdAndUpdate(
       req.params.id,
       { title, description, images, tags },
       { new: true }
     );
+
     if (!car) {
       return res.status(404).json({ message: "Car not found" });
     }
+
     res.json(car);
   } catch (error) {
     res.status(500).json({ message: "Error updating car", error });

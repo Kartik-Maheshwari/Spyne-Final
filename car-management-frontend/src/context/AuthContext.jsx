@@ -7,6 +7,8 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [auth, setAuth] = useState(null);
   const navigate = useNavigate();
+  const baseURL = "https://spyne-assignment-backend.onrender.com/api";
+  // const baseURL = "http://localhost:5000/api";
 
   useEffect(() => {
     const storedAuth = localStorage.getItem("auth");
@@ -23,7 +25,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ auth, setAuth, logout }}>
+    <AuthContext.Provider value={{ auth, setAuth, logout, baseURL }}>
       {children}
     </AuthContext.Provider>
   );

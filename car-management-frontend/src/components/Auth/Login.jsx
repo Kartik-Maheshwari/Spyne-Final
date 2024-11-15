@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const Login = () => {
-  const { setAuth } = useAuthContext();
+  const { setAuth, baseURL } = useAuthContext();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
@@ -15,10 +15,10 @@ const Login = () => {
     e.preventDefault();
 
     try {
-      const response = await axios.post(
-        "https://spyne-assignment-backend.onrender.com/api/auth/login",
-        { email, password }
-      );
+      const response = await axios.post(`${baseURL}/auth/login`, {
+        email,
+        password,
+      });
       console.log(response.data);
 
       setAuth(response.data);
